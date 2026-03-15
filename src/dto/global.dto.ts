@@ -1,7 +1,7 @@
 /**
- * Options for the `cleanPackageJson` plugin.
+ * Options for the `distPackage` plugin.
  */
-export interface CleanPackageJsonOptions {
+export interface DistPackageOptions {
   /**
    * Output directory where the cleaned `package.json` will be written.
    *

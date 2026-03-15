@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import type { NormalizedOutputOptions, OutputBundle, Plugin } from 'rolldown';
 import { PLUGIN_NAME } from './consts.js';
-import type { CleanPackageJsonOptions } from './dto/global.dto.js';
+import type { DistPackageOptions } from './dto/global.dto.js';
 import { removeOutDir } from './helpers/remove.helper.js';
 
 const DEP_FIELDS = [
@@ -31,13 +31,13 @@ const DEP_FIELDS = [
  * ```ts
  * // rolldown.config.ts
  * import { defineConfig } from 'rolldown'
- * import { cleanPackageJson } from 'rolldown-plugin-dist-package'
+ * import { distPackage } from 'rolldown-plugin-dist-package'
  *
  * export default defineConfig({
  *   input: 'src/index.ts',
  *   output: { dir: 'dist' },
  *   plugins: [
- *     cleanPackageJson({
+ *     distPackage({
  *       removeFields: ['scripts', 'devDependencies'],
  *       copyFiles: ['README.md', 'LICENSE'],
  *       set: { sideEffects: false },
@@ -46,11 +46,14 @@ const DEP_FIELDS = [
  * })
  * ```
  */
-export function cleanPackageJson(options: CleanPackageJsonOptions = {}): Plugin {
+export function distPackage(options: DistPackageOptions = {}): Plugin {
   return {
     name: PLUGIN_NAME,
 
-    async writeBundle(outputOptions: NormalizedOutputOptions, _bundle: OutputBundle) {
+    async writeBundle(
+      outputOptions: NormalizedOutputOptions,
+      _bundle: OutputBundle,
+    ) {
       const root = process.cwd();
       const src = path.join(root, 'package.json');
 
@@ -76,7 +79,11 @@ export function cleanPackageJson(options: CleanPackageJsonOptions = {}): Plugin 
 
       // Transform and write package.json
       const rawJson = fs.readFileSync(src, 'utf8');
-      const transformedJson = await transformPackageJson(rawJson, targetDir, options);
+      const transformedJson = await transformPackageJson(
+        rawJson,
+        targetDir,
+        options,
+      );
 
       // Validate output
       if (options.validate) {
@@ -93,7 +100,9 @@ export function cleanPackageJson(options: CleanPackageJsonOptions = {}): Plugin 
       }
 
       fs.writeFileSync(path.join(destDir, 'package.json'), transformedJson);
-      console.log(`✅ [${PLUGIN_NAME}] package.json copied and cleaned to ${targetDir}`);
+      console.log(
+        `✅ [${PLUGIN_NAME}] package.json copied and cleaned to ${targetDir}`,
+      );
 
       // Copy additional files
       if (options.copyFiles) {
@@ -108,7 +117,9 @@ export function cleanPackageJson(options: CleanPackageJsonOptions = {}): Plugin 
             fs.copyFileSync(srcFile, destFile);
             console.log(`✅ [${PLUGIN_NAME}] Copied ${file} to ${targetDir}`);
           } else {
-            console.warn(`⚠️ [${PLUGIN_NAME}] File not found, skipping: ${file}`);
+            console.warn(
+              `⚠️ [${PLUGIN_NAME}] File not found, skipping: ${file}`,
+            );
           }
         }
       }
@@ -121,23 +132,26 @@ export function cleanPackageJson(options: CleanPackageJsonOptions = {}): Plugin 
  * `package.json` string and returns the cleaned JSON string.
  *
  * Exposed primarily for unit-testing; prefer using the plugin via
- * {@link cleanPackageJson} in production builds.
+ * {@link distPackage} in production builds.
  *
  * @param rawJson - Raw contents of `package.json` as a UTF-8 string.
  * @param outDir  - The output directory name whose prefix should be stripped
  *                  from path values (e.g. `'dist'`).
- * @param options - The same options accepted by {@link cleanPackageJson}.
+ * @param options - The same options accepted by {@link distPackage}.
  * @returns Pretty-printed JSON string of the cleaned package.
  */
 export async function transformPackageJson(
   rawJson: string,
   outDir: string,
-  options: CleanPackageJsonOptions,
+  options: DistPackageOptions,
 ): Promise<string> {
   let pkg = JSON.parse(rawJson) as Record<string, unknown>;
 
   // Strip outDir prefix from path-like values
-  pkg = removeOutDir(pkg, outDir, options.bareFields || ['bin']) as Record<string, unknown>;
+  pkg = removeOutDir(pkg, outDir, options.bareFields || ['bin']) as Record<
+    string,
+    unknown
+  >;
 
   // Remove specified top-level fields
   for (const field of options.removeFields || []) {
@@ -149,7 +163,9 @@ export async function transformPackageJson(
     for (const depField of DEP_FIELDS) {
       const deps = pkg[depField];
       if (deps && typeof deps === 'object' && !Array.isArray(deps)) {
-        for (const [name, version] of Object.entries(deps as Record<string, string>)) {
+        for (const [name, version] of Object.entries(
+          deps as Record<string, string>,
+        )) {
           const newVersion =
             typeof options.rewriteDependencies === 'function'
               ? options.rewriteDependencies(name, version)
@@ -176,4 +192,4 @@ export async function transformPackageJson(
   return JSON.stringify(pkg, null, 2);
 }
 
-export type { CleanPackageJsonOptions };
+export type { DistPackageOptions };

@@ -1,5 +1,5 @@
 import { defineConfig } from 'tsdown';
-import { cleanPackageJson } from './src/index.js';
+import { distPackage } from './src/index.js';
 
 const outDir = 'dist';
 
@@ -12,8 +12,10 @@ export default defineConfig({
   plugins: [
     // Dogfooding and inception at its finest:
     // Using this very plugin to build and package itself! ;)
-    cleanPackageJson({
+    distPackage({
       outDir,
+      validate: true,
+      copyFiles: ['README.md', 'LICENSE', 'CHANGELOG.md'],
       removeFields: [
         'packageManager',
         'lint-staged',

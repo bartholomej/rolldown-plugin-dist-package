@@ -36,13 +36,13 @@ npm install -D rolldown-plugin-dist-package
 ```ts
 // rolldown.config.ts, rollup.config.ts, tsdown.config.ts, ...
 import { defineConfig } from 'rolldown';
-import { cleanPackageJson } from 'rolldown-plugin-dist-package';
+import { distPackage } from 'rolldown-plugin-dist-package';
 
 export default defineConfig({
   input: 'src/index.ts',
   output: { dir: 'dist' },
   plugins: [
-    cleanPackageJson({
+    distPackage({
       removeFields: ['scripts', 'devDependencies', 'lint-staged'],
     }),
   ],
@@ -53,22 +53,28 @@ export default defineConfig({
 
 ## Options
 
-| Option                 | Type                                      | Default       | Description                                                                                          |
-| ---------------------- | ----------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------- |
-| `outDir`               | `string`                                  | auto-detected | Output directory. If omitted, the plugin reads it from the bundler's own output options.             |
-| `removeFields`         | `string[]`                                | `[]`          | Top-level fields to delete entirely from the output.                                                 |
-| `bareFields`           | `string[]`                                | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
-| `copyFiles`            | `string \| string[]`                      | —             | Files to copy from the project root into the output directory.                                       |
-| `set`                  | `Record<string, unknown>`                 | —             | Fields to add or override in the output `package.json`.                                              |
-| `rewriteDependencies`  | `Record<string, string> \| Function`      | —             | Rewrite versions in all dependency fields. See below.                                                |
-| `transform`            | `(pkg) => pkg \| Promise<pkg>`            | —             | Custom transform applied last, after all other options.                                              |
-| `validate`             | `boolean \| string[]`                     | `false`       | Warn about missing fields. `true` checks `name` and `version`.                                       |
+| Option                | Type                                 | Default       | Description                                                                                         |
+| --------------------- | ------------------------------------ | ------------- | --------------------------------------------------------------------------------------------------- |
+| `outDir`              | `string`                             | auto-detected | Output directory. If omitted, the plugin reads it from the bundler's own output options.            |
+| `removeFields`        | `string[]`                           | `[]`          | Top-level fields to delete entirely from the output.                                                |
+| `bareFields`          | `string[]`                           | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
+| `copyFiles`           | `string \| string[]`                 | —             | Files to copy from the project root into the output directory.                                      |
+| `set`                 | `Record<string, unknown>`            | —             | Fields to add or override in the output `package.json`.                                             |
+| `rewriteDependencies` | `Record<string, string> \| Function` | —             | Rewrite versions in all dependency fields. See below.                                               |
+| `transform`           | `(pkg) => pkg \| Promise<pkg>`       | —             | Custom transform applied last, after all other options.                                             |
+| `validate`            | `boolean \| string[]`                | `false`       | Warn about missing fields. `true` checks `name` and `version`.                                      |
 
 ### `removeFields`
 
 ```ts
-cleanPackageJson({
-  removeFields: ['scripts', 'devDependencies', 'devDependenciesMeta', 'lint-staged', 'prettier'],
+distPackage({
+  removeFields: [
+    'scripts',
+    'devDependencies',
+    'devDependenciesMeta',
+    'lint-staged',
+    'prettier',
+  ],
 });
 ```
 
@@ -77,7 +83,7 @@ cleanPackageJson({
 By default, `bin` entries are treated specially because Node.js expects bare relative paths (`cli.js`, not `./cli.js`). Extend the list for other fields with the same convention:
 
 ```ts
-cleanPackageJson({
+distPackage({
   bareFields: ['bin', 'man'],
 });
 ```
@@ -85,7 +91,7 @@ cleanPackageJson({
 ### `copyFiles`
 
 ```ts
-cleanPackageJson({
+distPackage({
   copyFiles: ['README.md', 'LICENSE', 'CHANGELOG.md'],
 });
 ```
@@ -93,7 +99,7 @@ cleanPackageJson({
 ### `set`
 
 ```ts
-cleanPackageJson({
+distPackage({
   set: { sideEffects: false, type: 'module' },
 });
 ```
@@ -103,7 +109,7 @@ cleanPackageJson({
 Object form — replace specific packages:
 
 ```ts
-cleanPackageJson({
+distPackage({
   rewriteDependencies: { 'my-local-pkg': '^1.2.0' },
 });
 ```
@@ -111,9 +117,11 @@ cleanPackageJson({
 Function form — strip Yarn `workspace:` protocol:
 
 ```ts
-cleanPackageJson({
+distPackage({
   rewriteDependencies: (_, version) =>
-    version.startsWith('workspace:') ? version.slice('workspace:'.length) || '*' : undefined,
+    version.startsWith('workspace:')
+      ? version.slice('workspace:'.length) || '*'
+      : undefined,
 });
 ```
 
@@ -122,7 +130,7 @@ cleanPackageJson({
 Full control over the final package object. Runs after all other options:
 
 ```ts
-cleanPackageJson({
+distPackage({
   transform: (pkg) => ({
     ...pkg,
     // add a custom field, remove something conditionally, etc.
@@ -135,10 +143,10 @@ cleanPackageJson({
 
 ```ts
 // warn if name or version is missing
-cleanPackageJson({ validate: true });
+distPackage({ validate: true });
 
 // warn if specific fields are missing
-cleanPackageJson({ validate: ['name', 'version', 'exports'] });
+distPackage({ validate: ['name', 'version', 'exports'] });
 ```
 
 ---
