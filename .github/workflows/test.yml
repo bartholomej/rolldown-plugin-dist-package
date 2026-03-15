@@ -1,0 +1,39 @@
+name: 🧪 Tests
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    name: 🧪 Tests
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: 📦 Enable Corepack
+        run: corepack enable
+
+      - name: 🔧 Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'yarn'
+
+      - name: 📦 Install dependencies
+        run: yarn install --immutable
+
+      - name: 🏗️ Build app
+        run: yarn build
+
+      - name: 🧪 Tests
+        run: yarn test
+
+      # - name: 📊 Upload coverage to Codecov
+      #   uses: codecov/codecov-action@v5
+      #   with:
+      #     token: ${{ secrets.CODECOV_TOKEN }}
+      #     fail_ci_if_error: true
+      #     verbose: true

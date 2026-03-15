@@ -1,12 +1,15 @@
 {
   "name": "rolldown-plugin-dist-package",
   "version": "1.0.0",
-  "description": "A plugin to clean package.json for distribution",
+  "description": "A Rolldown/Rollup/Vite/Tsdown/Tsup plugin to prepare package.json for distribution",
   "type": "module",
   "author": "BART! <bart@bartweb.cz>",
   "scripts": {
     "build": "tsdown --config-loader unrun",
-    "test": "vitest run"
+    "test": "vitest run",
+    "release:patch": "git checkout master && npm version patch -m \"chore(update): patch release %s 🐛\"",
+    "release:minor": "git checkout master && npm version minor -m \"chore(update): release %s 🚀\"",
+    "release:major": "git checkout master && npm version major -m \"chore(update): major release %s 💥\""
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
