@@ -9,7 +9,8 @@
     "test": "vitest run",
     "release:patch": "git checkout master && npm version patch -m \"chore(update): patch release %s 🐛\"",
     "release:minor": "git checkout master && npm version minor -m \"chore(update): release %s 🚀\"",
-    "release:major": "git checkout master && npm version major -m \"chore(update): major release %s 💥\""
+    "release:major": "git checkout master && npm version major -m \"chore(update): major release %s 💥\"",
+    "postversion": "git push && git push --follow-tags"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
@@ -43,6 +44,14 @@
       "import": "./dist/index.js"
     }
   },
+  "repository": {
+    "url": "git+https://github.com/bartholomej/rolldown-plugin-dist-package.git",
+    "type": "git"
+  },
+  "bugs": {
+    "url": "https://github.com/bartholomej/rolldown-plugin-dist-package/issues"
+  },
+  "homepage": "https://github.com/bartholomej/rolldown-plugin-dist-package#readme",
   "keywords": [
     "rollup",
     "plugin",
