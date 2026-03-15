@@ -1,6 +1,8 @@
-# Prepare your `package.json` for distribution (Rolldown, Rollup, Vite plugin)
+![Rolldown compatibility](https://registry.vite.dev/api/badges?package=rolldown-plugin-dist-package&tool=rolldown) ![Rollup compatibility](https://registry.vite.dev/api/badges?package=rolldown-plugin-dist-package&tool=rollup) ![Vite compatibility](https://registry.vite.dev/api/badges?package=rolldown-plugin-dist-package&tool=vite)
 
-> A [Rolldown](https://rolldown.rs) / [Rollup](https://rollupjs.org) / Vite / Tsdown / Tsup plugin that automatically copies a **cleaned** `package.json` into your build output directory.
+# Prepare `package.json` for distribution (Rolldown plugin)
+
+> A [Rolldown](https://rolldown.rs) / [Rollup](https://rollupjs.org) / Vite / tsup / tsdown plugin that automatically copies a **cleaned** `package.json` into your build output directory.
 
 When you publish an npm package from a `dist/` folder, the original `package.json` is full of paths like `./dist/index.js` and fields like `scripts` or `devDependencies` that make no sense in the published artefact. This plugin fixes that for you at build time — no manual maintenance required.
 
