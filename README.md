@@ -1,20 +1,160 @@
-# Clean package.json for distribution (Rolldown, Rollup, Vite plugin)
+# Prepare your `package.json` for distribution (Rolldown, Rollup, Vite plugin)
 
-> This plugin cleans package.json for distribution.
+> A [Rolldown](https://rolldown.rs) / [Rollup](https://rollupjs.org) / Vite / Tsdown / Tsup plugin that automatically copies a **cleaned** `package.json` into your build output directory.
+
+When you publish an npm package from a `dist/` folder, the original `package.json` is full of paths like `./dist/index.js` and fields like `scripts` or `devDependencies` that make no sense in the published artefact. This plugin fixes that for you at build time — no manual maintenance required.
+
+---
+
+## What it does
+
+- **Strips `outDir` prefixes** from every path-like value in `package.json`
+  `./dist/index.js` → `./index.js`
+- **Removes fields** you don't want consumers to see (e.g. `scripts`, `devDependencies`)
+- **Handles `bin` correctly** — paths like `./dist/cli.js` become `cli.js` (without `./`) because that's what Node.js expects for executables
+- Works with both **Rolldown**, **Rollup**, **Vite**, **Tsdown**, **Tsup**, ...
+
+---
+
+## Installation
+
+```sh
+npm install -D rolldown-plugin-clean-package-json
+# yarn add -D rolldown-plugin-clean-package-json
+# pnpm add -D rolldown-plugin-clean-package-json
+```
+
+---
 
 ## Usage
 
-```typescript
-// rolldown.config.ts
+```ts
+// rolldown.config.ts, rollup.config.ts, tsdown.config.ts, ...
+import { defineConfig } from 'rolldown';
 import { cleanPackageJson } from 'rolldown-plugin-clean-package-json';
 
 export default defineConfig({
+  input: 'src/index.ts',
+  output: { dir: 'dist' },
   plugins: [
     cleanPackageJson({
-      outDir: 'dist',
-      removeFields: ['scripts', 'devDependencies'],
-      noPrefix: ['bin'],
+      removeFields: ['scripts', 'devDependencies', 'lint-staged'],
     }),
   ],
 });
 ```
+
+---
+
+## Options
+
+| Option         | Type       | Default       | Description                                                                                         |
+| -------------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------- |
+| `outDir`       | `string`   | auto-detected | Output directory. If omitted, the plugin reads it from the bundler's own output options.            |
+| `removeFields` | `string[]` | `[]`          | Top-level `package.json` fields to delete entirely from the output.                                 |
+| `noPrefix`     | `string[]` | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
+
+### `removeFields`
+
+```ts
+cleanPackageJson({
+  removeFields: [
+    'scripts',
+    'devDependencies',
+    'devDependenciesMeta',
+    'lint-staged',
+    'prettier',
+  ],
+});
+```
+
+### `noPrefix`
+
+By default, `bin` entries are treated specially because Node.js expects bare relative paths there (`cli.js`, not `./cli.js`). You can extend this list for other fields that follow the same convention:
+
+```ts
+cleanPackageJson({
+  noPrefix: ['bin', 'man'],
+});
+```
+
+---
+
+## Example
+
+Given this `package.json` in the project root:
+
+```json
+{
+  "name": "my-lib",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "my-cli": "./dist/cli.js"
+  },
+  "scripts": { "build": "rolldown" },
+  "devDependencies": { "rolldown": "^1.0.0" }
+}
+```
+
+After building with `removeFields: ['scripts', 'devDependencies']`, the plugin writes this into `dist/package.json`:
+
+```json
+{
+  "name": "my-lib",
+  "version": "1.0.0",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "types": "./index.d.ts"
+    }
+  },
+  "bin": {
+    "my-cli": "cli.js"
+  }
+}
+```
+
+## ⭐️ Support
+
+If you find this project useful and you are brave enough consider [making a donation](https://github.com/sponsors/bartholomej) for some 🍺 or 🍵 ;)
+
+- Giving it a ⭐️ on [GitHub](https://github.com/bartholomej/rolldown-plugin-clean-package-json)
+- Sharing it with others who might benefit
+- [Sponsoring the project](https://github.com/sponsors/bartholomej) to support ongoing development
+
+Your support helps maintain and improve this library! 🙏
+
+## 🔒 Privacy & Security
+
+**This library does not collect, store, or transmit any user data.**
+
+I physically can't. I have nowhere to store it. I don't even have a server database to store it. So even if Justin Bieber asked nicely to see your data, I wouldn't have anything to show him.
+
+## 📝 License
+
+MIT © 2026 [Lukas Bartak](http://bartweb.cz)
+
+See [LICENSE](LICENSE) for full details.
+
+---
+
+<div align="center">
+
+**Built with ❤️ by [Lukas Bartak](https://bartweb.cz)**
+
+Powered by nature 🗻, wind 💨, tea 🍵 and beer 🍺
+
+<!--
+[⭐ Star on GitHub](https://github.com/bartholomej/rolldown-plugin-clean-package-json) • [📦 NPM Package](https://www.npmjs.com/rolldown-plugin-clean-package-json) • [🐳 Docker Hub](https://hub.docker.com/r/bartholomej/rolldown-plugin-clean-package-json) -->
+
+</div>

@@ -5,6 +5,35 @@ import { PLUGIN_NAME } from './consts.js';
 import type { CleanPackageJsonOptions } from './dto/global.dto.js';
 import { removeOutDir } from './helpers/remove.helper.js';
 
+/**
+ * Rolldown / Rollup plugin that copies a cleaned version of `package.json`
+ * into the build output directory.
+ *
+ * It automatically:
+ * - Strips the `outDir` prefix from all path-like values so that paths work
+ *   correctly when the package is consumed from the output folder.
+ * - Removes any extra top-level fields you specify via `removeFields`.
+ *
+ * @param options - Optional plugin configuration.
+ * @returns A Rolldown/Rollup-compatible plugin object.
+ *
+ * @example
+ * ```ts
+ * // rolldown.config.ts
+ * import { defineConfig } from 'rolldown'
+ * import { cleanPackageJson } from 'rolldown-plugin-clean-package-json'
+ *
+ * export default defineConfig({
+ *   input: 'src/index.ts',
+ *   output: { dir: 'dist' },
+ *   plugins: [
+ *     cleanPackageJson({
+ *       removeFields: ['scripts', 'devDependencies'],
+ *     }),
+ *   ],
+ * })
+ * ```
+ */
 export function cleanPackageJson(
   options: CleanPackageJsonOptions = {},
 ): Plugin {
