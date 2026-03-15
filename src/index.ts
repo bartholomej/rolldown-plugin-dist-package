@@ -1,15 +1,15 @@
 import fs from 'fs';
 import path from 'path';
 import type { NormalizedOutputOptions, OutputBundle, Plugin } from 'rolldown';
-import type { CleanPackageJsonOptions, JsonValue } from './dto/global.dto.js';
-
-const NAME = 'rolldown-plugin-clean-package-json';
+import { PLUGIN_NAME } from './consts.js';
+import type { CleanPackageJsonOptions } from './dto/global.dto.js';
+import { removeOutDir } from './helpers/remove.helper.js';
 
 export function cleanPackageJson(
   options: CleanPackageJsonOptions = {},
 ): Plugin {
   return {
-    name: NAME,
+    name: PLUGIN_NAME,
 
     // Updated signature with correct Rolldown types
     writeBundle(outputOptions: NormalizedOutputOptions, bundle: OutputBundle) {
@@ -21,7 +21,7 @@ export function cleanPackageJson(
 
       if (!targetDir) {
         console.warn(
-          `⚠️ [${NAME}] Could not determine output directory. Skipping package.json copy.`,
+          `⚠️ [${PLUGIN_NAME}] Could not determine output directory. Skipping package.json copy.`,
         );
         return;
       }
@@ -32,7 +32,7 @@ export function cleanPackageJson(
       const dest = path.join(destDir, 'package.json');
 
       if (!fs.existsSync(src)) {
-        console.error(`❌ [${NAME}] package.json not found`);
+        console.error(`❌ [${PLUGIN_NAME}] package.json not found`);
         return;
       }
 
@@ -44,7 +44,7 @@ export function cleanPackageJson(
       fs.writeFileSync(dest, transformedPkg);
 
       console.log(
-        `✅ [${NAME}] package.json copied and cleaned in ${targetDir}`,
+        `✅ [${PLUGIN_NAME}] package.json copied and cleaned in ${targetDir}`,
       );
     },
   };
@@ -65,46 +65,6 @@ export function transformPackageJson(
   }
 
   return JSON.stringify(pkg, null, 2);
-}
-
-function removeOutDir(
-  obj: JsonValue,
-  outDir: string,
-  noPrefixFields: string[] = [],
-  inheritedSkip: boolean = false,
-): JsonValue {
-  if (typeof obj === 'string') {
-    const prefix = `./${outDir}/`;
-    if (obj.startsWith(prefix)) {
-      let cleaned = obj.slice(prefix.length);
-      cleaned = path.posix.normalize(cleaned);
-
-      if (inheritedSkip) {
-        return cleaned;
-      }
-
-      cleaned = cleaned ? `./${cleaned}` : './';
-      return cleaned;
-    }
-    return obj;
-  }
-
-  if (Array.isArray(obj)) {
-    return obj.map((item) =>
-      removeOutDir(item, outDir, noPrefixFields, inheritedSkip),
-    );
-  }
-
-  if (typeof obj === 'object' && obj !== null) {
-    const newObj: Record<string, any> = {};
-    for (const key in obj) {
-      const willSkip = inheritedSkip || noPrefixFields.includes(key);
-      newObj[key] = removeOutDir(obj[key], outDir, noPrefixFields, willSkip);
-    }
-    return newObj;
-  }
-
-  return obj;
 }
 
 export type { CleanPackageJsonOptions };
