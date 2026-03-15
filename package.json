@@ -1,5 +1,5 @@
 {
-  "name": "rolldown-plugin-clean-package-json",
+  "name": "rolldown-plugin-dist-package",
   "version": "1.0.0",
   "description": "A plugin to clean package.json for distribution",
   "type": "module",

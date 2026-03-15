@@ -35,7 +35,7 @@ describe('transformPackageJson', () => {
     expect(parsed.types).toBe('./index.d.ts');
   });
 
-  it('removes outDir prefix but does not add relative dot for noPrefix fields', () => {
+  it('removes outDir prefix but does not add relative dot for bareFields', () => {
     const input = JSON.stringify({
       bin: {
         cli: './dist/cli.js',
@@ -43,7 +43,7 @@ describe('transformPackageJson', () => {
     });
 
     const result = transformPackageJson(input, 'dist', {
-      noPrefix: ['bin'],
+      bareFields: ['bin'],
     });
     const parsed = JSON.parse(result);
 

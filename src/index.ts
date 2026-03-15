@@ -21,7 +21,7 @@ import { removeOutDir } from './helpers/remove.helper.js';
  * ```ts
  * // rolldown.config.ts
  * import { defineConfig } from 'rolldown'
- * import { cleanPackageJson } from 'rolldown-plugin-clean-package-json'
+ * import { cleanPackageJson } from 'rolldown-plugin-dist-package'
  *
  * export default defineConfig({
  *   input: 'src/index.ts',
@@ -86,7 +86,7 @@ export function transformPackageJson(
 ): string {
   let pkg = JSON.parse(rawJson);
 
-  pkg = removeOutDir(pkg, outDir, options.noPrefix || ['bin']);
+  pkg = removeOutDir(pkg, outDir, options.bareFields || ['bin']);
 
   // Clean up unnecessary fields
   for (const field of options.removeFields || []) {

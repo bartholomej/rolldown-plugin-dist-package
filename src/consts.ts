@@ -1,1 +1,1 @@
-export const PLUGIN_NAME = 'rolldown-plugin-clean-package-json';
+export const PLUGIN_NAME = 'rolldown-plugin-dist-package';

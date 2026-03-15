@@ -32,7 +32,7 @@ export interface CleanPackageJsonOptions {
    * @example ['bin']
    * @default ['bin']
    */
-  noPrefix?: string[];
+  bareFields?: string[];
 }
 
 export type JsonValue = string | number | boolean | JsonObject | JsonValue[];

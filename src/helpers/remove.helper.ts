@@ -6,21 +6,21 @@ import type { JsonValue } from '../dto/global.dto.js';
  * JSON-serialisable object tree.
  *
  * - Regular fields: `./dist/index.js` → `./index.js`
- * - Fields listed in `noPrefixFields` (and their descendants): the leading
+ * - Fields listed in `bareFields` (and their descendants): the leading
  *   `./` is omitted so the result is a bare relative path (`cli.js`).
  *
- * @param obj            - The value to transform (any JSON-compatible type).
- * @param outDir         - The output directory name to strip, e.g. `'dist'`.
- * @param noPrefixFields - Top-level field names whose values should not receive
- *                         the `./` prefix after stripping (default `[]`).
- * @param inheritedSkip  - Internal flag propagated to nested calls when a
- *                         no-prefix ancestor field has been entered.
+ * @param obj        - The value to transform (any JSON-compatible type).
+ * @param outDir     - The output directory name to strip, e.g. `'dist'`.
+ * @param bareFields - Top-level field names whose values should not receive
+ *                     the `./` prefix after stripping (default `[]`).
+ * @param inheritedSkip - Internal flag propagated to nested calls when a
+ *                        bare-path ancestor field has been entered.
  * @returns The transformed value with path prefixes removed.
  */
 export function removeOutDir(
   obj: JsonValue,
   outDir: string,
-  noPrefixFields: string[] = [],
+  bareFields: string[] = [],
   inheritedSkip: boolean = false,
 ): JsonValue {
   if (typeof obj === 'string') {
@@ -41,15 +41,15 @@ export function removeOutDir(
 
   if (Array.isArray(obj)) {
     return obj.map((item) =>
-      removeOutDir(item, outDir, noPrefixFields, inheritedSkip),
+      removeOutDir(item, outDir, bareFields, inheritedSkip),
     );
   }
 
   if (typeof obj === 'object' && obj !== null) {
     const newObj: Record<string, any> = {};
     for (const key in obj) {
-      const willSkip = inheritedSkip || noPrefixFields.includes(key);
-      newObj[key] = removeOutDir(obj[key], outDir, noPrefixFields, willSkip);
+      const willSkip = inheritedSkip || bareFields.includes(key);
+      newObj[key] = removeOutDir(obj[key], outDir, bareFields, willSkip);
     }
     return newObj;
   }

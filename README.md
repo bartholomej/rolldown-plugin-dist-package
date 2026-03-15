@@ -19,9 +19,9 @@ When you publish an npm package from a `dist/` folder, the original `package.jso
 ## Installation
 
 ```sh
-npm install -D rolldown-plugin-clean-package-json
-# yarn add -D rolldown-plugin-clean-package-json
-# pnpm add -D rolldown-plugin-clean-package-json
+npm install -D rolldown-plugin-dist-package
+# yarn add -D rolldown-plugin-dist-package
+# pnpm add -D rolldown-plugin-dist-package
 ```
 
 ---
@@ -31,7 +31,7 @@ npm install -D rolldown-plugin-clean-package-json
 ```ts
 // rolldown.config.ts, rollup.config.ts, tsdown.config.ts, ...
 import { defineConfig } from 'rolldown';
-import { cleanPackageJson } from 'rolldown-plugin-clean-package-json';
+import { cleanPackageJson } from 'rolldown-plugin-dist-package';
 
 export default defineConfig({
   input: 'src/index.ts',
@@ -52,7 +52,7 @@ export default defineConfig({
 | -------------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------- |
 | `outDir`       | `string`   | auto-detected | Output directory. If omitted, the plugin reads it from the bundler's own output options.            |
 | `removeFields` | `string[]` | `[]`          | Top-level `package.json` fields to delete entirely from the output.                                 |
-| `noPrefix`     | `string[]` | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
+| `bareFields`     | `string[]` | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
 
 ### `removeFields`
 
@@ -68,13 +68,13 @@ cleanPackageJson({
 });
 ```
 
-### `noPrefix`
+### `bareFields`
 
 By default, `bin` entries are treated specially because Node.js expects bare relative paths there (`cli.js`, not `./cli.js`). You can extend this list for other fields that follow the same convention:
 
 ```ts
 cleanPackageJson({
-  noPrefix: ['bin', 'man'],
+  bareFields: ['bin', 'man'],
 });
 ```
 
@@ -128,7 +128,7 @@ After building with `removeFields: ['scripts', 'devDependencies']`, the plugin w
 
 If you find this project useful and you are brave enough consider [making a donation](https://github.com/sponsors/bartholomej) for some 🍺 or 🍵 ;)
 
-- Giving it a ⭐️ on [GitHub](https://github.com/bartholomej/rolldown-plugin-clean-package-json)
+- Giving it a ⭐️ on [GitHub](https://github.com/bartholomej/rolldown-plugin-dist-package)
 - Sharing it with others who might benefit
 - [Sponsoring the project](https://github.com/sponsors/bartholomej) to support ongoing development
 
@@ -155,6 +155,6 @@ See [LICENSE](LICENSE) for full details.
 Powered by nature 🗻, wind 💨, tea 🍵 and beer 🍺
 
 <!--
-[⭐ Star on GitHub](https://github.com/bartholomej/rolldown-plugin-clean-package-json) • [📦 NPM Package](https://www.npmjs.com/rolldown-plugin-clean-package-json) • [🐳 Docker Hub](https://hub.docker.com/r/bartholomej/rolldown-plugin-clean-package-json) -->
+[⭐ Star on GitHub](https://github.com/bartholomej/rolldown-plugin-dist-package) • [📦 NPM Package](https://www.npmjs.com/rolldown-plugin-dist-package) • [🐳 Docker Hub](https://hub.docker.com/r/bartholomej/rolldown-plugin-dist-package) -->
 
 </div>
