@@ -1,16 +1,25 @@
 import { defineConfig } from 'tsdown';
+import { cleanPackageJson } from './src/index.js';
+
+const outDir = 'dist';
 
 export default defineConfig({
-  // Define the entry point
   entry: ['./src/index.ts'],
-  
-  // Build only for ECMAScript Modules
   format: ['esm'],
-  
-  // Automatically generate TypeScript declaration files (.d.ts / .d.mts)
   dts: true,
-  
-  // Clean the dist directory before every build
   clean: true,
   fixedExtension: false,
+  plugins: [
+    // Dogfooding and inception at its finest:
+    // Using this very plugin to build and package itself! ;)
+    cleanPackageJson({
+      outDir,
+      removeFields: [
+        'packageManager',
+        'lint-staged',
+        'devDependencies',
+        'scripts',
+      ],
+    }),
+  ],
 });

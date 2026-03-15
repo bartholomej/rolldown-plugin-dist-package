@@ -5,7 +5,7 @@
   "type": "module",
   "author": "BART! <bart@bartweb.cz>",
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown --config-loader unrun",
     "test": "vitest run"
   },
   "devDependencies": {
