@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // Explicitly tell TypeScript to include Node.js types
+    "types": ["node"]
+  },
+
+  // Include all TypeScript files in the compilation
+  "include": ["**/*.ts"],
+
+  // Exclude dependencies and build output
+  "exclude": ["node_modules", "dist"]
+}

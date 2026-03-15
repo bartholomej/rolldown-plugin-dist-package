@@ -1,0 +1,50 @@
+{
+  "name": "rolldown-plugin-clean-package-json",
+  "version": "1.0.0",
+  "description": "A plugin to clean package.json for distribution",
+  "type": "module",
+  "author": "BART! <bart@bartweb.cz>",
+  "scripts": {
+    "build": "tsdown",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "rolldown": "^1.0.0-rc.9",
+    "tsdown": "^0.21.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "peerDependencies": {
+    "rolldown": "^1.0.0",
+    "rollup": "^3.0.0 || ^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "rolldown": {
+      "optional": true
+    },
+    "rollup": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "keywords": [
+    "rollup",
+    "plugin",
+    "rolldown",
+    "package.json"
+  ],
+  "license": "MIT",
+  "packageManager": "yarn@4.13.0"
+}
