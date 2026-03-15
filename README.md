@@ -49,6 +49,37 @@ export default defineConfig({
 });
 ```
 
+## Fun fact
+
+> **Dogfooding/Inception** — this plugin builds and packages itself!
+> The [`tsdown.config.ts`](./tsdown.config.ts) in this repo is the canonical real-world example:
+>
+> ```ts
+> // tsdown.config.ts (this very repo)
+> import { defineConfig } from 'tsdown';
+> import { distPackage } from './src/index.js';
+>
+> export default defineConfig({
+>   entry: ['./src/index.ts'],
+>   format: ['esm'],
+>   dts: true,
+>   clean: true,
+>   plugins: [
+>     distPackage({
+>       outDir: 'dist',
+>       validate: true,
+>       copyFiles: ['README.md', 'LICENSE', 'CHANGELOG.md'],
+>       removeFields: [
+>         'packageManager',
+>         'lint-staged',
+>         'devDependencies',
+>         'scripts',
+>       ],
+>     }),
+>   ],
+> });
+> ```
+
 ---
 
 ## Options
