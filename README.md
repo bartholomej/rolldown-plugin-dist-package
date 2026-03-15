@@ -12,7 +12,12 @@ When you publish an npm package from a `dist/` folder, the original `package.jso
   `./dist/index.js` → `./index.js`
 - **Removes fields** you don't want consumers to see (e.g. `scripts`, `devDependencies`)
 - **Handles `bin` correctly** — paths like `./dist/cli.js` become `cli.js` (without `./`) because that's what Node.js expects for executables
-- Works with both **Rolldown**, **Rollup**, **Vite**, **Tsdown**, **Tsup**, ...
+- **Copies extra files** (README, LICENSE, CHANGELOG, …) into the output directory
+- **Sets / overrides fields** — e.g. force `sideEffects: false` or `type: 'module'`
+- **Rewrites dependency versions** — strip `workspace:` protocol, pin versions, etc.
+- **Custom `transform` function** — full control over the final package object
+- **Validates** the output — warns when required fields are missing
+- Works with **Rolldown**, **Rollup**, **Vite**, **Tsdown**, **Tsup**, …
 
 ---
 
@@ -48,34 +53,92 @@ export default defineConfig({
 
 ## Options
 
-| Option         | Type       | Default       | Description                                                                                         |
-| -------------- | ---------- | ------------- | --------------------------------------------------------------------------------------------------- |
-| `outDir`       | `string`   | auto-detected | Output directory. If omitted, the plugin reads it from the bundler's own output options.            |
-| `removeFields` | `string[]` | `[]`          | Top-level `package.json` fields to delete entirely from the output.                                 |
-| `bareFields`     | `string[]` | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
+| Option                 | Type                                      | Default       | Description                                                                                          |
+| ---------------------- | ----------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------- |
+| `outDir`               | `string`                                  | auto-detected | Output directory. If omitted, the plugin reads it from the bundler's own output options.             |
+| `removeFields`         | `string[]`                                | `[]`          | Top-level fields to delete entirely from the output.                                                 |
+| `bareFields`           | `string[]`                                | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
+| `copyFiles`            | `string \| string[]`                      | —             | Files to copy from the project root into the output directory.                                       |
+| `set`                  | `Record<string, unknown>`                 | —             | Fields to add or override in the output `package.json`.                                              |
+| `rewriteDependencies`  | `Record<string, string> \| Function`      | —             | Rewrite versions in all dependency fields. See below.                                                |
+| `transform`            | `(pkg) => pkg \| Promise<pkg>`            | —             | Custom transform applied last, after all other options.                                              |
+| `validate`             | `boolean \| string[]`                     | `false`       | Warn about missing fields. `true` checks `name` and `version`.                                       |
 
 ### `removeFields`
 
 ```ts
 cleanPackageJson({
-  removeFields: [
-    'scripts',
-    'devDependencies',
-    'devDependenciesMeta',
-    'lint-staged',
-    'prettier',
-  ],
+  removeFields: ['scripts', 'devDependencies', 'devDependenciesMeta', 'lint-staged', 'prettier'],
 });
 ```
 
 ### `bareFields`
 
-By default, `bin` entries are treated specially because Node.js expects bare relative paths there (`cli.js`, not `./cli.js`). You can extend this list for other fields that follow the same convention:
+By default, `bin` entries are treated specially because Node.js expects bare relative paths (`cli.js`, not `./cli.js`). Extend the list for other fields with the same convention:
 
 ```ts
 cleanPackageJson({
   bareFields: ['bin', 'man'],
 });
+```
+
+### `copyFiles`
+
+```ts
+cleanPackageJson({
+  copyFiles: ['README.md', 'LICENSE', 'CHANGELOG.md'],
+});
+```
+
+### `set`
+
+```ts
+cleanPackageJson({
+  set: { sideEffects: false, type: 'module' },
+});
+```
+
+### `rewriteDependencies`
+
+Object form — replace specific packages:
+
+```ts
+cleanPackageJson({
+  rewriteDependencies: { 'my-local-pkg': '^1.2.0' },
+});
+```
+
+Function form — strip Yarn `workspace:` protocol:
+
+```ts
+cleanPackageJson({
+  rewriteDependencies: (_, version) =>
+    version.startsWith('workspace:') ? version.slice('workspace:'.length) || '*' : undefined,
+});
+```
+
+### `transform`
+
+Full control over the final package object. Runs after all other options:
+
+```ts
+cleanPackageJson({
+  transform: (pkg) => ({
+    ...pkg,
+    // add a custom field, remove something conditionally, etc.
+    funding: 'https://github.com/sponsors/yourname',
+  }),
+});
+```
+
+### `validate`
+
+```ts
+// warn if name or version is missing
+cleanPackageJson({ validate: true });
+
+// warn if specific fields are missing
+cleanPackageJson({ validate: ['name', 'version', 'exports'] });
 ```
 
 ---
