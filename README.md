@@ -1,25 +1,54 @@
 ![Rolldown compatibility](https://registry.vite.dev/api/badges?package=rolldown-plugin-dist-package&tool=rolldown) ![Rollup compatibility](https://registry.vite.dev/api/badges?package=rolldown-plugin-dist-package&tool=rollup) ![Vite compatibility](https://registry.vite.dev/api/badges?package=rolldown-plugin-dist-package&tool=vite)
 
-# Prepare `package.json` for distribution (Rolldown plugin)
+# dist-package — clean up `package.json` for publishing
 
-> A [Rolldown](https://rolldown.rs) / [Rollup](https://rollupjs.org) / Vite / tsup / tsdown plugin that automatically copies a **cleaned** `package.json` into your build output directory.
+> A [Rolldown](https://rolldown.rs) / [Rollup](https://rollupjs.org) / Vite / tsup / tsdown plugin that automatically writes a **cleaned** `package.json` into your build output directory.
 
-When you publish an npm package from a `dist/` folder, the original `package.json` is full of paths like `./dist/index.js` and fields like `scripts` or `devDependencies` that make no sense in the published artefact. This plugin fixes that for you at build time — no manual maintenance required.
+When you publish from a `dist/` folder, your `package.json` contains paths like `./dist/index.js` and fields like `scripts` or `devDependencies` that don't belong in the published package. This plugin fixes that at build time — no manual maintenance required.
 
 ---
 
 ## What it does
 
-- **Strips `outDir` prefixes** from every path-like value in `package.json`
-  `./dist/index.js` → `./index.js`
+- **Strips `outDir` prefixes** — `./dist/index.js` → `./index.js`
 - **Removes fields** you don't want consumers to see (e.g. `scripts`, `devDependencies`)
-- **Handles `bin` correctly** — paths like `./dist/cli.js` become `cli.js` (without `./`) because that's what Node.js expects for executables
+- **Handles `bin`** — `./dist/cli.js` → `cli.js` (Node.js expects bare paths for executables)
 - **Copies extra files** (README, LICENSE, CHANGELOG, …) into the output directory
 - **Sets / overrides fields** — e.g. force `sideEffects: false` or `type: 'module'`
 - **Rewrites dependency versions** — strip `workspace:` protocol, pin versions, etc.
 - **Custom `transform` function** — full control over the final package object
 - **Validates** the output — warns when required fields are missing
 - Works with **Rolldown**, **Rollup**, **Vite**, **Tsdown**, **Tsup**, …
+
+## Example
+
+> Let's say your `package.json` looks something like this — full of `dist/` paths, scripts, and devDependencies that have no place in a published package. The plugin rewrites it and drops a clean copy into your output directory, ready to publish as-is. Everything is fully configurable:
+
+```diff
+  {
+    "name": "my-lib",
+    "version": "1.0.0",
+-   "main": "./dist/index.js",
+-   "types": "./dist/index.d.ts",
++   "main": "./index.js",
++   "types": "./index.d.ts",
+    "exports": {
+      ".": {
+-       "import": "./dist/index.js",
+-       "types": "./dist/index.d.ts"
++       "import": "./index.js",
++       "types": "./index.d.ts"
+      }
+    },
+    "bin": {
+-     "my-cli": "./dist/cli.js"
++     "my-cli": "cli.js"
+    },
+-   "scripts": { "build": "rolldown" },
+-   "devDependencies": { "rolldown": "^1.0.0" }
++   "funding": "https://github.com/sponsors/you"
+  }
+```
 
 ---
 
@@ -35,6 +64,9 @@ npm install -D rolldown-plugin-dist-package
 
 ## Usage
 
+> 🐶 **Fun fact:** This plugin builds and packages itself — it's eating its own dog food!
+> Check out [`tsdown.config.ts`](./tsdown.config.ts) for a real-world example.
+
 ```ts
 // rolldown.config.ts, rollup.config.ts, tsdown.config.ts, ...
 import { defineConfig } from 'rolldown';
@@ -45,42 +77,18 @@ export default defineConfig({
   output: { dir: 'dist' },
   plugins: [
     distPackage({
+      // outDir: 'dist',         // auto-detected from bundler output options
       removeFields: ['scripts', 'devDependencies', 'lint-staged'],
+      // bareFields: ['bin'],    // strip outDir prefix without adding './'
+      // copyFiles: ['README.md', 'LICENSE', 'CHANGELOG.md'],
+      // set: { sideEffects: false, type: 'module' },
+      // rewriteDependencies: (_, v) => v.startsWith('workspace:') ? v.slice(10) || '*' : undefined,
+      // transform: (pkg) => ({ ...pkg, funding: 'https://github.com/sponsors/you' }),
+      // validate: true,         // warn if name or version is missing
     }),
   ],
 });
 ```
-
-## Fun fact
-
-> **Dogfooding/Inception** — this plugin builds and packages itself!
-> The [`tsdown.config.ts`](./tsdown.config.ts) in this repo is the canonical real-world example:
->
-> ```ts
-> // tsdown.config.ts (this very repo)
-> import { defineConfig } from 'tsdown';
-> import { distPackage } from './src/index.js';
->
-> export default defineConfig({
->   entry: ['./src/index.ts'],
->   format: ['esm'],
->   dts: true,
->   clean: true,
->   plugins: [
->     distPackage({
->       outDir: 'dist',
->       validate: true,
->       copyFiles: ['README.md', 'LICENSE', 'CHANGELOG.md'],
->       removeFields: [
->         'packageManager',
->         'lint-staged',
->         'devDependencies',
->         'scripts',
->       ],
->     }),
->   ],
-> });
-> ```
 
 ---
 
@@ -88,8 +96,8 @@ export default defineConfig({
 
 | Option                | Type                                 | Default       | Description                                                                                         |
 | --------------------- | ------------------------------------ | ------------- | --------------------------------------------------------------------------------------------------- |
-| `outDir`              | `string`                             | auto-detected | Output directory. If omitted, the plugin reads it from the bundler's own output options.            |
-| `removeFields`        | `string[]`                           | `[]`          | Top-level fields to delete entirely from the output.                                                |
+| `outDir`              | `string`                             | auto-detected | Output directory. If omitted, read from the bundler's own output options.                           |
+| `removeFields`        | `string[]`                           | `[]`          | Top-level fields to delete from the output.                                                         |
 | `bareFields`          | `string[]`                           | `['bin']`     | Fields whose path values are stripped of the `outDir` prefix but do **not** get the `./` prepended. |
 | `copyFiles`           | `string \| string[]`                 | —             | Files to copy from the project root into the output directory.                                      |
 | `set`                 | `Record<string, unknown>`            | —             | Fields to add or override in the output `package.json`.                                             |
@@ -97,49 +105,9 @@ export default defineConfig({
 | `transform`           | `(pkg) => pkg \| Promise<pkg>`       | —             | Custom transform applied last, after all other options.                                             |
 | `validate`            | `boolean \| string[]`                | `false`       | Warn about missing fields. `true` checks `name` and `version`.                                      |
 
-### `removeFields`
-
-```ts
-distPackage({
-  removeFields: [
-    'scripts',
-    'devDependencies',
-    'devDependenciesMeta',
-    'lint-staged',
-    'prettier',
-  ],
-});
-```
-
-### `bareFields`
-
-By default, `bin` entries are treated specially because Node.js expects bare relative paths (`cli.js`, not `./cli.js`). Extend the list for other fields with the same convention:
-
-```ts
-distPackage({
-  bareFields: ['bin', 'man'],
-});
-```
-
-### `copyFiles`
-
-```ts
-distPackage({
-  copyFiles: ['README.md', 'LICENSE', 'CHANGELOG.md'],
-});
-```
-
-### `set`
-
-```ts
-distPackage({
-  set: { sideEffects: false, type: 'module' },
-});
-```
-
 ### `rewriteDependencies`
 
-Object form — replace specific packages:
+Object form — replace specific versions:
 
 ```ts
 distPackage({
@@ -160,73 +128,19 @@ distPackage({
 
 ### `transform`
 
-Full control over the final package object. Runs after all other options:
+Runs last, after all other options. Full control over the final package object:
 
 ```ts
 distPackage({
   transform: (pkg) => ({
     ...pkg,
-    // add a custom field, remove something conditionally, etc.
+    // add fields, remove conditionally, etc.
     funding: 'https://github.com/sponsors/yourname',
   }),
 });
 ```
 
-### `validate`
-
-```ts
-// warn if name or version is missing
-distPackage({ validate: true });
-
-// warn if specific fields are missing
-distPackage({ validate: ['name', 'version', 'exports'] });
-```
-
 ---
-
-## Example
-
-Given this `package.json` in the project root:
-
-```json
-{
-  "name": "my-lib",
-  "version": "1.0.0",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "bin": {
-    "my-cli": "./dist/cli.js"
-  },
-  "scripts": { "build": "rolldown" },
-  "devDependencies": { "rolldown": "^1.0.0" }
-}
-```
-
-After building with `removeFields: ['scripts', 'devDependencies']`, the plugin writes this into `dist/package.json`:
-
-```json
-{
-  "name": "my-lib",
-  "version": "1.0.0",
-  "main": "./index.js",
-  "types": "./index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./index.js",
-      "types": "./index.d.ts"
-    }
-  },
-  "bin": {
-    "my-cli": "cli.js"
-  }
-}
-```
 
 ## ⭐️ Support
 
