@@ -1,6 +1,6 @@
 {
   "name": "rolldown-plugin-dist-package",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A Rolldown/Rollup/Vite/Tsdown/Tsup plugin to prepare package.json for distribution",
   "type": "module",
   "author": "BART! <bart@bartweb.cz>",
@@ -47,6 +47,28 @@
     "plugin",
     "rolldown",
     "package.json"
+  ],
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/bartholomej"
+    },
+    {
+      "type": "ko_fi",
+      "url": "https://ko-fi.com/bartholomej"
+    },
+    {
+      "type": "buy_me_a_coffee",
+      "url": "https://www.buymeacoffee.com/bartholomej"
+    },
+    {
+      "type": "paypal",
+      "url": "https://www.paypal.me/bartholomej"
+    },
+    {
+      "type": "thanks_dev",
+      "url": "https://thanks.dev/u/gh/bartholomej"
+    }
   ],
   "license": "MIT",
   "packageManager": "yarn@4.13.0"
