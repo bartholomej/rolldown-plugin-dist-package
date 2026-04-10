@@ -13,11 +13,11 @@
     "postversion": "git push && git push --follow-tags"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
-    "rolldown": "^1.0.0-rc.9",
-    "tsdown": "^0.21.3",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.0"
+    "@types/node": "^25.6.0",
+    "rolldown": "^1.0.0-rc.15",
+    "tsdown": "^0.21.7",
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.4"
   },
   "peerDependencies": {
     "rolldown": "^1.0.0",
