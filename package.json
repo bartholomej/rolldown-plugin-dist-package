@@ -1,6 +1,6 @@
 {
   "name": "rolldown-plugin-dist-package",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A Rolldown/Rollup/Vite/Tsdown/Tsup plugin to prepare package.json for distribution",
   "type": "module",
   "author": "BART! <bart@bartweb.cz>",
